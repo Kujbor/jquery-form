@@ -54,7 +54,7 @@
                         } else if (!condition || !!_.bind(condition, _.extend({field: field}, data))()) {
 
                             var name = parent ? parent + '.' + field : field;
-                            var value = dataJSON && dataJSON[field] ? dataJSON[field] : '';
+                            var value = dataJSON && dataJSON[field] !== null ? dataJSON[field] : '';
 
                             that.append(template({
                                 field: field,
