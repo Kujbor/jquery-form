@@ -1,0 +1,54 @@
+/*
+ * template.html - example of jQuery makeForm plugin template
+ * Author Oleg Taranov aka Kujbor
+ * Copyright (C) 2013: CubeComp Development
+ */
+<% if (data.type === 'text') { %>
+<div class="form-group">
+    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
+    <div class="col-lg-10">
+        <input type="text" name="<%= name %>" id="<%= name %>" value="<%= value %>" class="form-control">
+        <span class="help-block"></span>
+    </div>
+</div>
+<% } else if (data.type === 'password') { %>
+<div class="form-group">
+    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
+    <div class="col-lg-10">
+        <input type="password" name="<%= name %>" id="<%= name %>" value="<%= value %>" class="form-control">
+        <span class="help-block"></span>
+    </div>
+</div>
+<% } else if (data.type === 'textarea') { %>
+<div class="form-group">
+    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
+    <div class="col-lg-10">
+        <textarea name="<%= name %>" id="<%= name %>" class="form-control" rows="3"><%= value %></textarea>
+        <span class="help-block"></span>
+    </div>
+</div>
+<% } else if (data.type === 'select') { %>
+<div class="form-group">
+    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
+    <div class="col-lg-10">
+        <% var multiple = data.multiple ? 'multiple' : '' %>
+        <select <%= multiple %> name="<%= name %>" id="<%= name %>" class="form-control">
+            <% $.each(data.values, function(id, value) { %>
+            <% var valueTitle = value.title[fg.config.lang] %>
+            <% var selected = (dataJSON && _.indexOf(dataJSON[field], value.id) !== -1) ? 'selected' : '' %>
+            <option value="<%= value.id %>" <%= selected %>><%= valueTitle %></option>
+            <% }); %>
+        </select>
+        <span class="help-block"></span>
+    </div>
+</div>
+<% } else if (data.type === 'submit') { %>
+<div class="form-group">
+    <div class="col-lg-offset-2 col-lg-10">
+        <button type="submit" class="btn btn-primary">
+            <i class="icon-ok"></i>
+            <span>Submit</span>
+        </button>
+    </div>
+</div>
+<% } %>
