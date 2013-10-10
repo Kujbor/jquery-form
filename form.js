@@ -1,6 +1,7 @@
 /*
  * form.js - jQuery plugin for Twitter Bootstrap framework forms
- * Author & copyright (C) 2013: Oleg Taranov aka Kujbor, CubeComp Development
+ * Author Oleg Taranov aka Kujbor
+ * Copyright (C) 2013: CubeComp Development
  */
 (function($, _) {
 
