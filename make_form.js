@@ -1,5 +1,5 @@
 /*
- * form.js - jQuery plugin for Twitter Bootstrap framework forms
+ * make_form.js - jQuery plugin for Twitter Bootstrap framework forms
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
@@ -9,7 +9,7 @@
 
     var template, lang;
 
-    $.form = function(selector) {
+    $.makeForm = function(selector) {
 
         return _.extend($(selector), new function() {
 
@@ -89,9 +89,9 @@
              */
             this.toJSON = function(toString) {
 
-                var form = this;
+                var makeForm = this;
 
-                var newData = form.serializeArray();
+                var newData = makeForm.serializeArray();
                 var formJSON = {};
 
                 $.each(newData, function() {
@@ -116,7 +116,7 @@
 
                     });
 
-                    var control = form.find('#' + names.join('\\.'));
+                    var control = makeForm.find('#' + names.join('\\.'));
 
                     if (control.length && control.attr('multiple')) {
 
