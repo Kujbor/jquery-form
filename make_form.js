@@ -1,5 +1,5 @@
 /*
- * form_generator.js - jQuery plugin for Twitter Bootstrap framework forms
+ * make_form.js - jQuery plugin for Twitter Bootstrap framework forms
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
