@@ -1,5 +1,5 @@
 /*
- * template.html - example of jQuery makeForm plugin template
+ * Example of jQuery makeForm plugin template
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
@@ -23,7 +23,7 @@
 <div class="form-group">
     <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
     <div class="col-lg-10">
-        <textarea name="<%= name %>" id="<%= name %>" class="form-control" rows="3"><%= value %></textarea>
+        <textarea name="<%= name %>" id="<%= name %>" value="<%= value %>" class="form-control" rows="3"><%= value %></textarea>
         <span class="help-block"></span>
     </div>
 </div>
@@ -31,11 +31,10 @@
 <div class="form-group">
     <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
     <div class="col-lg-10">
-        <% var multiple = data.multiple ? 'multiple' : '' %>
-        <select <%= multiple %> name="<%= name %>" id="<%= name %>" class="form-control">
+        <select <%= data.multiple ? 'multiple' : '' %> name="<%= name %>" id="<%= name %>" class="form-control" size="<%= data.multiple ? data.values.length : 1 %>">
             <% $.each(data.values, function(id, value) { %>
             <% var valueTitle = value.title[fg.config.lang] %>
-            <% var selected = (dataJSON && _.indexOf(dataJSON[field], value.id) !== -1) ? 'selected' : '' %>
+            <% var selected = (dataJSON && _.indexOf(dataJSON[field], '' + value.id) !== -1) ? 'selected' : '' %>
             <option value="<%= value.id %>" <%= selected %>><%= valueTitle %></option>
             <% }); %>
         </select>
@@ -47,7 +46,7 @@
     <div class="col-lg-offset-2 col-lg-10">
         <button type="submit" class="btn btn-primary">
             <i class="icon-ok"></i>
-            <span>Submit</span>
+            <span>Отправить</span>
         </button>
     </div>
 </div>
