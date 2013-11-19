@@ -1,5 +1,5 @@
 /*
- * Example of jQuery make-form plugin setup
+ * Example of jQuery.Form plugin setup
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
