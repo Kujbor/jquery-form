@@ -1,15 +1,15 @@
 /*
- * make_form.js - jQuery plugin for Twitter Bootstrap framework forms
+ * jquery.form.js - jQuery plugin for Twitter Bootstrap framework forms
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
-(function($) {
+define("jquery.form", ["jquery"], function($) {
 
     "use strict";
 
     var template, lang;
 
-    function FormGenerator() {
+    function Form() {
 
         /**
          * Метод генерирующий контролы формы
@@ -27,14 +27,14 @@
 
                 $.each(fieldsJSON, function(field, data) {
 
-                    if (data.type === 'group') {
+                    if (data.type === "group") {
 
-                        makeControls(data.values, dataJSON ? dataJSON[field] : null, parent ? parent + '-' + field : field);
+                        makeControls(data.values, dataJSON ? dataJSON[field] : null, parent ? parent + "-" + field : field);
 
                     } else if (!condition || !!_.bind(condition, _.extend({field: field}, data))()) {
 
-                        var name = parent ? parent + '-' + field : field;
-                        var value = dataJSON && dataJSON[field] !== null ? dataJSON[field] : '';
+                        var name = parent ? parent + "-" + field : field;
+                        var value = dataJSON && dataJSON[field] !== null ? dataJSON[field] : "";
 
                         that.append(template({
                             field: field,
@@ -51,10 +51,10 @@
 
             })(fieldsJSON, dataJSON);
 
-            this.find('[type="submit"]').remove();
+            this.find("[type='submit']").remove();
 
             this.append(template({
-                data: {type: 'submit'}
+                data: {type: "submit"}
             }));
 
             return this;
@@ -75,7 +75,7 @@
 
             $.each(newData, function() {
 
-                var names = this.name.split('-');
+                var names = this.name.split("-");
                 var obj = formJSON;
                 var parent = null;
                 var field = null;
@@ -95,9 +95,9 @@
 
                 });
 
-                var control = form.find('#' + names.join('-'));
+                var control = form.find("#" + names.join("-"));
 
-                if (control.length && control.attr('multiple')) {
+                if (control.length && control.attr("multiple")) {
 
                     if (parent[field.push]) {
 
@@ -128,7 +128,7 @@
          */
         this.beforeSubmit = function(callback) {
 
-            return this.off('submit').on('submit', _.bind(callback, this));
+            return this.off("submit").on("submit", _.bind(callback, this));
 
         };
 
@@ -142,7 +142,7 @@
         this.error = function(text, elem) {
 
             elem.next().text(text);
-            elem.closest('.form-group').addClass('has-error');
+            elem.closest(".form-group").addClass("has-error");
             elem.focus();
 
         };
@@ -160,8 +160,8 @@
             var that = this;
             var formData = this.toJSON();
 
-            that.find('.has-error .help-block').text('');
-            that.find('.has-error').removeClass('has-error');
+            that.find(".has-error .help-block").text("");
+            that.find(".has-error").removeClass("has-error");
 
             var text = false;
             var elem = null;
@@ -170,16 +170,16 @@
 
                 $.each(rules, function(field, data) {
 
-                    if (data.type === 'group') {
+                    if (data.type === "group") {
 
-                        checkValide(formData[field], data.values, prefix ? prefix + '-' + field : field);
+                        checkValide(formData[field], data.values, prefix ? prefix + "-" + field : field);
 
                     } else if (data.required) {
 
                         if (!formData[field]) {
 
-                            text = 'Поле является обязательным для заполнения';
-                            elem = that.find('#' + (prefix ? prefix + '-' + field : field));
+                            text = "Поле является обязательным для заполнения";
+                            elem = that.find("#" + (prefix ? prefix + "-" + field : field));
                             return false;
 
                         }
@@ -207,7 +207,7 @@
          * @returns {object} Возвращает собственный объект с расширенными методами
          */
         this.clear = function() {
-            this.find('*').remove();
+            this.find("*").remove();
             return this;
         };
 
@@ -215,7 +215,7 @@
     }
 
     $.form = function(selector) {
-        return _.extend($(selector), new FormGenerator());
+        return $.extend($(selector), new Form());
     };
 
     /**
@@ -235,4 +235,4 @@
 
     };
 
-})(jQuery);
+});
