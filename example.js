@@ -13,5 +13,4 @@ $(function() {
             lang: fg.config.lang
         });
     });
-
 })();
