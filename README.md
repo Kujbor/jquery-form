@@ -1,4 +1,4 @@
 jquery-form
 ===========
 
-jQuery plugin for Twitter Bootstrap framework forms
+jQuery plugin for Twitter Bootstrap forms
