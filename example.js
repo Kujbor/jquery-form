@@ -3,14 +3,14 @@
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
-$(function() {
+define("example", ["jquery.form", "underscore"], function() {
 
     "use strict";
 
-    $.get('templates/form-controls.html', function(response) {
+    $.get("template.html", function(response) {
         $.form.setup({
             template: _.template(response),
-            lang: fg.config.lang
+            lang: "ru"
         });
     });
 })();
