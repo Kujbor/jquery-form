@@ -122,6 +122,9 @@ define("jquery.form", ["jquery"], function($) {
                 }
             });
 
+            $.log.info("formData", newData);
+            $.log.info("formJSON", formJSON);
+
             return toString ? JSON.stringify(formJSON) : formJSON;
         };
 
@@ -181,15 +184,12 @@ define("jquery.form", ["jquery"], function($) {
 
                         checkValide(fieldSchema.values, fieldData, controlId);
 
-                    } else if (fieldSchema.required) {
+                    } else if (fieldSchema.required && !fieldData) {
 
-                        if (!$this._getFieldValue(controlId, fieldsData)) {
+                        text = "Поле является обязательным для заполнения";
+                        elem = $this.find("#" + controlId);
 
-                            text = "Поле является обязательным для заполнения";
-                            elem = $this.find("#" + controlId);
-
-                            return false;
-                        }
+                        return false;
                     }
                 });
             }
