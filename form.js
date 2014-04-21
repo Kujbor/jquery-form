@@ -7,55 +7,62 @@ define("jquery.form", ["jquery"], function($) {
 
     "use strict";
 
-    var template, lang;
-
     function Form() {
 
         /**
          * Метод генерирующий контролы формы
          * 
-         * @param {object} fieldsJSON Структура полей формы в JSON формате
-         * @param {object} dataJSON Данные полей формы в JSON формате
-         * @param {function} condition Функция проверяющая условие добавления елемента в форму, принимает объект содержащий данные о структуре поля, должна возвращать
-         * @returns {object} Возвращает собственный объект с расширенными методами
+         * @param {object} fieldsSchema Структура полей формы в JSON формате
+         * @param {object} fieldsData Данные полей формы в JSON формате
+         * @returns {object} Возвращает jQuery объект с расширенными методами
          */
-        this.addControls = function(fieldsJSON, dataJSON, condition) {
+        this.addControls = function(fieldsSchema, fieldsData) {
 
-            var that = this;
+            var $this = this;
 
-            (function makeControls(fieldsJSON, dataJSON, parent) {
+            var $row = $this.find(".row");
 
-                $.each(fieldsJSON, function(field, data) {
+            if (!$row.length) {
+                $row = $("<div>", {class: "row"}).appendTo($this);
+            }
 
-                    if (data.type === "group") {
+            function makeControls(fieldsSchema, fieldsData, parent) {
 
-                        makeControls(data.values, dataJSON ? dataJSON[field] : null, parent ? parent + "-" + field : field);
+                $.each(fieldsSchema, function(fieldId, fieldSchema) {
 
-                    } else if (!condition || !!_.bind(condition, _.extend({field: field}, data))()) {
+                    var controlId = parent ? parent + "-" + fieldId : fieldId;
+                    var fieldData = $this._getFieldValue(controlId, fieldsData);
 
-                        var name = parent ? parent + "-" + field : field;
-                        var value = dataJSON && dataJSON[field] !== null ? dataJSON[field] : "";
+                    if (fieldSchema.type === "group") {
 
-                        that.append(template({
-                            field: field,
-                            title: data.title[lang],
-                            value: value,
-                            name: name,
-                            data: data,
-                            dataJSON: dataJSON
+                        makeControls(fieldSchema.values, fieldData, controlId);
+
+                    } else {
+
+                        $row.append($this.template({
+                            controlId: controlId,
+                            fieldSchema: fieldSchema,
+                            fieldData: fieldData,
+                            fieldDataEncoded: fieldData ?
+                                    $.htmlEncode(JSON.stringify(fieldData)) :
+                                    null,
+                            fieldTitle: fieldSchema.title[$this.lang]
                         }));
-
                     }
-
                 });
+            }
 
-            })(fieldsJSON, dataJSON);
+            makeControls(fieldsSchema, fieldsData);
 
-            this.find("[type='submit']").remove();
+            if (!$this.find("[type='submit']").length) {
 
-            this.append(template({
-                data: {type: "submit"}
-            }));
+                makeControls({
+                    submit: {
+                        type: "submit",
+                        title: {ru: "Отправить"}
+                    }
+                });
+            }
 
             return this;
         };
@@ -79,44 +86,46 @@ define("jquery.form", ["jquery"], function($) {
                 var obj = formJSON;
                 var parent = null;
                 var field = null;
+                var value = this.value;
+
+                try {
+                    value = JSON.parse($.htmlDecode(this.value));
+                } catch (e) {
+                }
 
                 // Формируем путь к переменной в массиве по ее имени
-                _.each(names, function(name) {
+                $.each(names, function() {
 
-                    field = name;
+                    field = this;
 
                     parent = obj;
 
-                    if (!obj[name]) {
-                        obj[name] = {};
+                    if (!obj[this]) {
+                        obj[this] = {};
                     }
 
-                    obj = obj[name];
-
+                    obj = obj[this];
                 });
 
-                var control = form.find("#" + names.join("-"));
+                if (form.find("#" + this.name).attr("multiple")) {
 
-                if (control.length && control.attr("multiple")) {
+                    if (parent[field].push) {
 
-                    if (parent[field.push]) {
-
-                        parent[field].push(this.value);
+                        parent[field].push(value);
 
                     } else {
-
-                        parent[field] = [this.value];
-
+                        parent[field] = [value];
                     }
 
                 } else {
-                    parent[field] = this.value;
+                    parent[field] = value;
                 }
-
             });
 
-            return toString ? JSON.stringify(formJSON) : formJSON;
+            $.log.info("formData", newData);
+            $.log.info("formJSON", formJSON);
 
+            return toString ? JSON.stringify(formJSON) : formJSON;
         };
 
 
@@ -124,12 +133,10 @@ define("jquery.form", ["jquery"], function($) {
          * Метод, подставляющий переданную функцию в onsubmit формы
          * 
          * @param {function} callback   Функция которая вызовется перед сабитом
-         * @returns Возвращает собственный объект с расширенными методами
+         * @returns Возвращает jQuery объект с расширенными методами
          */
         this.beforeSubmit = function(callback) {
-
-            return this.off("submit").on("submit", _.bind(callback, this));
-
+            return this.off("submit").on("submit", $.proxy(callback, this));
         };
 
 
@@ -139,12 +146,12 @@ define("jquery.form", ["jquery"], function($) {
          * @param {string} text   Текст ошибки
          * @param {object} elem   jQuery объект поля формы
          */
-        this.error = function(text, elem) {
+        this.error = function(text, $elem) {
 
-            elem.next().text(text);
-            elem.closest(".form-group").addClass("has-error");
-            elem.focus();
+            var $formGroup = $elem.closest(".form-group");
 
+            $formGroup.addClass("has-error").find(".help-block").text(text);
+            $elem.focus();
         };
 
 
@@ -155,45 +162,45 @@ define("jquery.form", ["jquery"], function($) {
          * @param {object} rules Правила для полей формы в формате JSON
          * @returns {boolean} Возвращает результат проверки
          */
-        this.validate = function(rules) {
+        this.validate = function(fieldsSchema) {
 
-            var that = this;
-            var formData = this.toJSON();
+            var $this = this;
+            var fieldsData = this.toJSON();
 
-            that.find(".has-error .help-block").text("");
-            that.find(".has-error").removeClass("has-error");
+            $this.find(".has-error .help-block").text("");
+            $this.find(".has-error").removeClass("has-error");
 
             var text = false;
             var elem = null;
 
-            function checkValide(formData, rules, prefix) {
+            function checkValide(fieldsSchema, fieldsData, parent) {
 
-                $.each(rules, function(field, data) {
+                $.each(fieldsSchema, function(fieldId, fieldSchema) {
 
-                    if (data.type === "group") {
+                    var controlId = parent ? parent + "-" + fieldId : fieldId;
+                    var fieldData = $this._getFieldValue(controlId, fieldsData);
 
-                        checkValide(formData[field], data.values, prefix ? prefix + "-" + field : field);
+                    if (fieldSchema.type === "group") {
 
-                    } else if (data.required) {
+                        checkValide(fieldSchema.values, fieldData, controlId);
 
-                        if (!formData[field]) {
+                    } else if (fieldSchema.required) {
+
+                        if (!$this._getFieldValue(controlId, fieldsData)) {
 
                             text = "Поле является обязательным для заполнения";
-                            elem = that.find("#" + (prefix ? prefix + "-" + field : field));
+                            elem = $this.find("#" + controlId);
+
                             return false;
-
                         }
-
                     }
-
                 });
-
             }
 
-            checkValide(formData, rules);
+            checkValide(fieldsSchema, fieldsData);
 
             if (text && elem) {
-                that.error(text, elem);
+                $this.error(text, elem);
                 return false;
             }
 
@@ -204,7 +211,7 @@ define("jquery.form", ["jquery"], function($) {
         /**
          * Метод удаляющий из формы все контролы
          * 
-         * @returns {object} Возвращает собственный объект с расширенными методами
+         * @returns {object} Возвращает jQuery объект с расширенными методами
          */
         this.clear = function() {
             this.find("*").remove();
@@ -212,6 +219,22 @@ define("jquery.form", ["jquery"], function($) {
         };
 
 
+        /**
+         * Метод возвращающий значение контейнера из схемы данных формы
+         * 
+         * @returns {object} Возвращает объект с данными о поле формы
+         */
+        this._getFieldValue = function(field, data) {
+
+            var fieldPath = field.split("-");
+
+            if (fieldPath.length > 1) {
+                return data ? this._getFieldValue(fieldPath.slice(1).join("-"),
+                        data[fieldPath[0]]) : "";
+            } else {
+                return data && data[field] !== null ? data[field] : "";
+            }
+        };
     }
 
     $.form = function(selector) {
@@ -221,18 +244,9 @@ define("jquery.form", ["jquery"], function($) {
     /**
      * Метод настройки генератора форм
      * 
-     * @param {object} options Объект настроек - шаблон и язык
+     * @param {object} options Объект настроек, например шаблон и язык
      */
     $.form.setup = function(options) {
-
-        if (options.template) {
-            template = options.template;
-        }
-
-        if (options.lang) {
-            lang = options.lang;
-        }
-
+        $.extend(Form.prototype, options);
     };
-
 });
