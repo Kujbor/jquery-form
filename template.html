@@ -1,53 +1,120 @@
-/*
- * Example of jQuery.Form plugin template
- * Author Oleg Taranov aka Kujbor
- * Copyright (C) 2013: CubeComp Development
- */
-<% if (data.type === 'text') { %>
-<div class="form-group">
-    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
-    <div class="col-lg-10">
-        <input type="text" name="<%= name %>" id="<%= name %>" value="<%= value %>" class="form-control">
-        <span class="help-block"></span>
+<% if (fieldSchema.type === "hidden") { %><!-- Скрытое поле -->
+<input type="hidden" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>">
+<% } %>
+
+<% if (fieldSchema.type === "text") { %><!-- Текстовое поле -->
+<div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+    <div class="form-group">
+        <label for="<%= controlId %>" class="col-lg-5 control-label">
+            <%= fieldTitle %>
+            <% if (fieldSchema.required === true) { %>
+            <span class="text-danger">*</span>
+            <% } %>
+        </label>
+        <div class="col-lg-7">
+            <input type="text" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" class="form-control">
+            <span class="help-block"></span>
+        </div>
     </div>
 </div>
-<% } else if (data.type === 'password') { %>
-<div class="form-group">
-    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
-    <div class="col-lg-10">
-        <input type="password" name="<%= name %>" id="<%= name %>" value="<%= value %>" class="form-control">
-        <span class="help-block"></span>
+<% } %>
+
+<% if (fieldSchema.type === "password") { %><!-- Поле типа пароль -->
+<div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+    <div class="form-group">
+        <label for="<%= controlId %>" class="col-lg-5 control-label">
+            <%= fieldTitle %>
+            <% if (fieldSchema.required === true) { %>
+            <span class="text-danger">*</span>
+            <% } %>
+        </label>
+        <div class="col-lg-7">
+            <input type="password" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" class="form-control">
+            <span class="help-block"></span>
+        </div>
     </div>
 </div>
-<% } else if (data.type === 'textarea') { %>
-<div class="form-group">
-    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
-    <div class="col-lg-10">
-        <textarea name="<%= name %>" id="<%= name %>" value="<%= value %>" class="form-control" rows="3"><%= value %></textarea>
-        <span class="help-block"></span>
+<% } %>
+
+<% if (fieldSchema.type === "textarea") { %><!-- Полнотекстовое поле -->
+<div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+    <div class="form-group">
+        <label for="<%= controlId %>" class="col-lg-5 control-label">
+            <%= fieldTitle %>
+            <% if (fieldSchema.required === true) { %>
+            <span class="text-danger">*</span>
+            <% } %>
+        </label>
+        <div class="col-lg-7">
+            <textarea name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" class="form-control" rows="3"><%= fieldData %></textarea>
+            <span class="help-block"></span>
+        </div>
     </div>
 </div>
-<% } else if (data.type === 'select') { %>
-<div class="form-group">
-    <label for="<%= name %>" class="col-lg-2 control-label"><%= title %></label>
-    <div class="col-lg-10">
-        <select <%= data.multiple ? 'multiple' : '' %> name="<%= name %>" id="<%= name %>" class="form-control" size="<%= data.multiple ? data.values.length : 1 %>">
-            <% $.each(data.values, function(id, value) { %>
-            <% var valueTitle = value.title[fg.config.lang] %>
-            <% var selected = (dataJSON && _.indexOf(dataJSON[field], '' + value.id) !== -1) ? 'selected' : '' %>
-            <option value="<%= value.id %>" <%= selected %>><%= valueTitle %></option>
+<% } %>
+
+<% if (fieldSchema.type === "radio") { %><!-- Поле типа радио -->
+<div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+    <div class="form-group">
+        <label for="<%= controlId %>" class="col-lg-5 control-label">
+            <%= fieldTitle %>
+            <% if (fieldSchema.required === true) { %>
+            <span class="text-danger">*</span>
+            <% } %>
+        </label>
+        <div class="col-lg-7">
+            <% $.each(fieldSchema.values, function(id, value) { %>
+            <% var valueTitle = value.title[fg.lang] %>
+            <% var selected = +fieldData === +value.id ? "checked" : "" %>
+            <label class="radio-inline">
+                <input type="radio" name="<%= controlId %>" id="<%= controlId %>" value="<%= value.id %>" <%= selected %>> <%= valueTitle %>
+            </label>
             <% }); %>
-        </select>
-        <span class="help-block"></span>
+            <span class="help-block"></span>
+        </div>
     </div>
 </div>
-<% } else if (data.type === 'submit') { %>
-<div class="form-group">
-    <div class="col-lg-offset-2 col-lg-10">
-        <button type="submit" class="btn btn-primary">
-            <i class="icon-ok"></i>
-            <span>Отправить</span>
-        </button>
+<% } %>
+
+<% if (fieldSchema.type === "select") { %><!-- Поле типа селект -->
+<div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+    <div class="form-group">
+        <label for="<%= controlId %>" class="col-lg-5 control-label">
+            <%= fieldTitle %>
+            <% if (fieldSchema.required === true) { %>
+            <span class="text-danger">*</span>
+            <% } %>
+        </label>
+        <div class="col-lg-7">
+            <select <%= fieldSchema.multiple ? "multiple" : "" %> name="<%= controlId %>" id="<%= controlId %>" class="form-control">
+                <% if (!fieldSchema.multiple) { %>
+                <option></option>
+                <% } %>
+                <% $.each(fieldSchema.values, function(id, value) { %>
+                <% var valueTitle = value.title[fg.lang] %>
+                <% var selected = (fieldSchema.multiple && _.indexOf(fieldData, "" + value.id) !== -1) || (+fieldData === +value.id) ? "selected" : "" %>
+                <option value="<%= value.id %>" <%= selected %>><%= valueTitle %></option>
+                <% }); %>
+            </select>
+            <span class="help-block"></span>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<% if (fieldSchema.type === "submit") { %><!-- Поле типа Submit -->
+<div class="col-sm-12">
+    <div class="row">
+        <div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+            <div class="form-group">
+                <div class="col-lg-offset-5 col-lg-7">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-check fa-lg text-success"></i>
+                        <span><%= fieldTitle %></span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <% } %>
