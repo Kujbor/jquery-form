@@ -122,9 +122,6 @@ define("jquery.form", ["jquery"], function($) {
                 }
             });
 
-            $.log.info("formData", newData);
-            $.log.info("formJSON", formJSON);
-
             return toString ? JSON.stringify(formJSON) : formJSON;
         };
 
