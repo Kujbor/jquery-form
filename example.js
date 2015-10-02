@@ -8,9 +8,6 @@ define("example", ["jquery.form", "underscore"], function() {
     "use strict";
 
     $.get("template.html", function(response) {
-        $.form.setup({
-            template: _.template(response),
-            lang: "ru"
-        });
+        $.fn.form.template = _.template(response);
     });
 })();
