@@ -341,10 +341,4 @@ define(["jquery", "underscore", "bootstrap"], function($) {
     $.htmlDecode = function(data) {
         return $("<div />").html(data.replace(/&quot;/g, '"')).text();
     };
-
-
-    /*
-     * Настройка генератора форм
-     */
-    $.fn.form.template = _.template($("script#form-controls-template").html());
 });
