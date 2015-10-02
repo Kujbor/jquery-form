@@ -3,30 +3,47 @@
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
-define("jquery.form", ["jquery"], function($) {
+define(["jquery", "underscore", "bootstrap"], function($) {
 
     "use strict";
 
-    function Form() {
+
+    /**
+     * Конструктор формы
+     *
+     * @param {Object} fieldsSchema Структура полей формы в JSON формате
+     * @param {Object} fieldsData Данные полей формы в JSON формате
+     * @returns {Object} Возвращает jQuery объект с расширенными методами
+     */
+
+    $.fn.form = function(fieldsSchema, fieldsData, callback) {
+
+        /**
+         * Проверяем не передан ли вторым параметром callback
+         */
+        if (!callback && typeof fieldsData === "function") {
+            callback = fieldsData;
+        }
+
 
         /**
          * Метод генерирующий контролы формы
-         * 
-         * @param {object} fieldsSchema Структура полей формы в JSON формате
-         * @param {object} fieldsData Данные полей формы в JSON формате
-         * @returns {object} Возвращает jQuery объект с расширенными методами
+         *
+         * @returns {Object} Возвращает jQuery объект с расширенными методами
          */
-        this.addControls = function(fieldsSchema, fieldsData) {
+        this._render = function() {
 
             var $this = this;
 
             var $row = $this.find(".row");
 
             if (!$row.length) {
-                $row = $("<div>", {class: "row"}).appendTo($this);
+                $row = $("<div class='row'>").appendTo($this);
             }
 
-            function makeControls(fieldsSchema, fieldsData, parent) {
+            var needToUpdateConditionsFields = [];
+
+            function makeControls(fieldsSchema, parent) {
 
                 $.each(fieldsSchema, function(fieldId, fieldSchema) {
 
@@ -35,34 +52,172 @@ define("jquery.form", ["jquery"], function($) {
 
                     if (fieldSchema.type === "group") {
 
-                        makeControls(fieldSchema.values, fieldData, controlId);
+                        makeControls(fieldSchema.values, controlId);
 
                     } else {
 
-                        $row.append($this.template({
+                        var $field = $row.append($this.form.template({
                             controlId: controlId,
                             fieldSchema: fieldSchema,
-                            fieldData: fieldData,
-                            fieldDataEncoded: fieldData ?
-                                    $.htmlEncode(JSON.stringify(fieldData)) :
-                                    null,
-                            fieldTitle: fieldSchema.title[$this.lang]
+                            fieldData: typeof fieldData === "string" ? fieldData.replace(/"/g, "\"") : fieldData,
+                            fieldDataEncoded: fieldData ? $.getProtectedValue(fieldData) : null,
+                            fieldTitle: fieldSchema.title,
+                            testId: $this.closest("form").attr("data-test") + "-" + controlId
                         }));
+
+                        if (fieldSchema.show_if) {
+
+                            for (var i in fieldSchema.show_if) {
+
+                                (function(i) {
+
+                                    $this.on("input change", "#" + i, function() {
+
+                                        if (fieldSchema.show_if[i].indexOf(this.value) !== -1) {
+
+                                            $field.closest(".form-group").show();
+
+                                        } else {
+
+                                            $field.closest(".form-group").hide();
+                                        }
+
+                                    });
+
+                                    needToUpdateConditionsFields.push($this.find("#" + i));
+
+                                })(i);
+                            }
+                        }
                     }
                 });
+
             }
 
-            makeControls(fieldsSchema, fieldsData);
+            makeControls(fieldsSchema);
+
+            $.each(needToUpdateConditionsFields, function() {
+                this.trigger("change");
+            });
 
             if (!$this.find("[type='submit']").length) {
 
                 makeControls({
                     submit: {
                         type: "submit",
-                        title: {ru: "Отправить"}
+                        title: "Отправить"
                     }
                 });
             }
+
+            return $this;
+        };
+
+
+        /**
+         * Метод проверяющий валидность формы и вфзывающий ошибки или callback
+         *
+         * @returns {boolean} Возвращает результат проверки
+         */
+        this._submit = function() {
+
+            var $this = this;
+            var fieldsData = this._toJSON();
+
+            $this.find(".form-group.has-error").removeClass("has-error").tooltip("destroy");
+
+            var errors = [];
+
+            (function checkValide(fieldsSchema, parent) {
+
+                $.each(fieldsSchema, function(fieldId, fieldSchema) {
+
+                    var controlId = parent ? parent + "-" + fieldId : fieldId;
+                    var fieldData = $this._getFieldValue(controlId, fieldsData);
+
+                    if (fieldSchema.type === "group") {
+
+                        checkValide(fieldSchema.values, controlId);
+
+                    } else if (fieldSchema.required && !fieldData) {
+
+                        if (fieldSchema.show_if) {
+
+                            for (var i in fieldSchema.show_if) {
+
+                                if (fieldSchema.show_if[i].indexOf($this.find("#" + i).val()) === -1) {
+
+                                    return true;
+                                }
+                            }
+                        }
+
+                        errors.push($this.find("#" + controlId));
+                    }
+                });
+
+            })(fieldsSchema);
+
+            if (!errors.length) {
+
+                callback.call(this, fieldsData);
+
+            } else {
+
+                setTimeout(function() {
+                    errors.reverse().map($this._error);
+                }, 150);
+            }
+
+            return false;
+        };
+
+
+        /**
+         * Метод вешающий идентификатор ошибки на поле формы
+         *
+         * @param {object} elem jQuery объект поля формы
+         * @param {string} text Текст ошибки
+         */
+        this._error = function($elem, text) {
+
+            var $formGroup = $elem.focus().closest(".form-group").addClass("has-error");
+
+            if (typeof text === "string") {
+
+                $formGroup.tooltip({
+                    title: text,
+                    trigger: "manual"
+                }).tooltip("show");
+            }
+        };
+
+
+        /**
+         * Метод возвращающий значение контейнера из схемы данных формы
+         *
+         * @returns {object} Возвращает объект с данными о поле формы
+         */
+        this._getFieldValue = function(field, data) {
+
+            var fieldPath = field.split("-");
+
+            if (fieldPath.length > 1) {
+                return data ? this._getFieldValue(fieldPath.slice(1).join("-"), data[fieldPath[0]]) : "";
+            } else {
+                return data && data[field] !== null ? data[field] : "";
+            }
+        };
+
+
+        /**
+         * Метод удаляющий из формы все контролы
+         *
+         * @returns {object} Возвращает jQuery объект с расширенными методами
+         */
+        this._clear = function() {
+
+            this.find("*").remove();
 
             return this;
         };
@@ -70,10 +225,10 @@ define("jquery.form", ["jquery"], function($) {
 
         /**
          * Метод возвращающий текущие данные полей формы в формате JSON
-         * @param {boolean} toString если передан true возвращается строка
-         * @returns {object||string}
+         *
+         * @returns {object}
          */
-        this.toJSON = function(toString) {
+        this._toJSON = function() {
 
             var form = this;
 
@@ -89,9 +244,8 @@ define("jquery.form", ["jquery"], function($) {
                 var value = this.value;
 
                 try {
-                    value = JSON.parse($.htmlDecode(this.value));
-                } catch (e) {
-                }
+                    value = $.getCleanValue(this.value);
+                } catch (e) {}
 
                 // Формируем путь к переменной в массиве по ее имени
                 $.each(names, function() {
@@ -122,125 +276,75 @@ define("jquery.form", ["jquery"], function($) {
                 }
             });
 
-            return toString ? JSON.stringify(formJSON) : formJSON;
+            return formJSON;
         };
 
-
-        /**
-         * Метод, подставляющий переданную функцию в onsubmit формы
-         * 
-         * @param {function} callback   Функция которая вызовется перед сабитом
-         * @returns Возвращает jQuery объект с расширенными методами
-         */
-        this.beforeSubmit = function(callback) {
-            return this.off("submit").on("submit", $.proxy(callback, this));
-        };
-
-
-        /**
-         * Метод вешающий идентификатор ошибки на передаваемое поле формы
-         * 
-         * @param {string} text   Текст ошибки
-         * @param {object} elem   jQuery объект поля формы
-         */
-        this.error = function(text, $elem) {
-
-            var $formGroup = $elem.closest(".form-group");
-
-            $formGroup.addClass("has-error").find(".help-block").text(text);
-            $elem.focus();
-        };
-
-
-        /**
-         * Метод проверяющий валидность форму и развешивающий
-         * идентификаторы на поля с ошибками
-         * 
-         * @param {object} rules Правила для полей формы в формате JSON
-         * @returns {boolean} Возвращает результат проверки
-         */
-        this.validate = function(fieldsSchema) {
-
-            var $this = this;
-            var fieldsData = this.toJSON();
-
-            $this.find(".has-error .help-block").text("");
-            $this.find(".has-error").removeClass("has-error");
-
-            var text = false;
-            var elem = null;
-
-            function checkValide(fieldsSchema, fieldsData, parent) {
-
-                $.each(fieldsSchema, function(fieldId, fieldSchema) {
-
-                    var controlId = parent ? parent + "-" + fieldId : fieldId;
-                    var fieldData = $this._getFieldValue(controlId, fieldsData);
-
-                    if (fieldSchema.type === "group") {
-
-                        checkValide(fieldSchema.values, fieldData, controlId);
-
-                    } else if (fieldSchema.required && !fieldData) {
-
-                        text = "Поле является обязательным для заполнения";
-                        elem = $this.find("#" + controlId);
-
-                        return false;
-                    }
-                });
-            }
-
-            checkValide(fieldsSchema, fieldsData);
-
-            if (text && elem) {
-                $this.error(text, elem);
-                return false;
-            }
-
-            return true;
-        };
-
-
-        /**
-         * Метод удаляющий из формы все контролы
-         * 
-         * @returns {object} Возвращает jQuery объект с расширенными методами
-         */
-        this.clear = function() {
-            this.find("*").remove();
-            return this;
-        };
-
-
-        /**
-         * Метод возвращающий значение контейнера из схемы данных формы
-         * 
-         * @returns {object} Возвращает объект с данными о поле формы
-         */
-        this._getFieldValue = function(field, data) {
-
-            var fieldPath = field.split("-");
-
-            if (fieldPath.length > 1) {
-                return data ? this._getFieldValue(fieldPath.slice(1).join("-"),
-                        data[fieldPath[0]]) : "";
-            } else {
-                return data && data[field] !== null ? data[field] : "";
-            }
-        };
-    }
-
-    $.form = function(selector) {
-        return $.extend($(selector), new Form());
+        return this._clear()._render().off("submit").on("submit", this._submit.bind(this));
     };
+
 
     /**
-     * Метод настройки генератора форм
-     * 
-     * @param {object} options Объект настроек, например шаблон и язык
+     * Метод получения значения, готового к записи в строку из любого типа данных
+     *
+     * @param {any} value - любые данные для шифрования
+     * @returns {string} - строка с зашифрованными данными
      */
-    $.form.setup = function(options) {
-        $.extend(Form.prototype, options);
+    $.getProtectedValue = function(value) {
+        return $.htmlEncode(JSON.stringify(value));
     };
+
+
+    /**
+     * Метод получения реального значения из зашифрованной строки
+     *
+     * @param {string} value - строка с зашифрованными данными
+     * @returns {any} - реальное значение любого типа
+     */
+    $.getCleanValue = function(value) {
+        return JSON.parse($.htmlDecode(value));
+    };
+
+
+    /**
+     * Метод настройки установки защищенного значения или чтения реального из контрола
+     *
+     * @param {any} newValue если переданы данные значение будет записано в контрол
+     * @returns {any} значение контрола
+     */
+    $.fn.protectedValue = function(newValue) {
+
+        if (typeof newValue === "undefined") {
+            return this.val() ? $.getCleanValue((this.val())) : "";
+        } else {
+            return this.val($.getProtectedValue(newValue ? newValue : ""));
+        }
+    };
+
+
+    /**
+     * Метод экранирования данных
+     *
+     * @param {string} value произвольный текст
+     * @returns {string} - экранированный текст
+     */
+    $.htmlEncode = function(data) {
+        return $("<div />").text(data).html().replace(/"/g, "&quot;");
+    };
+
+
+    /**
+     * Метод расшифровки экранированных данных
+     *
+     * @param {string} value экранированный текст
+     * @returns {string} - расшифрованный текст
+     */
+    $.htmlDecode = function(data) {
+        return $("<div />").html(data.replace(/&quot;/g, '"')).text();
+    };
+
+
+    /*
+     * Настройка генератора форм
+     */
+    $.fn.form.template = _.template($("script#form-controls-template").html());
 });
