@@ -1,85 +1,72 @@
-<% if (fieldSchema.type === "hidden") { %>
-
+<%% if (fieldSchema.type === "hidden") { %>
     <!-- Скрытое поле -->
-    <input type="hidden" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" data-test="<%= testId %>">
-
-<% } else if (fieldSchema.type !== "submit") { %>
-
-	<div class="col-sm-<%= fieldSchema.size ? fieldSchema.size : 6 %>">
+    <input type="hidden" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>">
+<%% } else if (fieldSchema.type !== "submit") { %>
+	<div class="col-sm-<%%= fieldSchema.size ? fieldSchema.size : 6 %>">
 	    <div class="form-group">
-	        <label class="control-label" for="<%= controlId %>">
-	            <span><%= fieldTitle %></span>
-	            <% if (fieldSchema.required === true) { %>
+	        <label class="control-label" for="<%%= controlId %>">
+	            <span><%%= fieldTitle %></span>
+	            <%% if (fieldSchema.required === true) { %>
 	                <span class="text-danger">*</span>
-	            <% } %>
+	            <%% } %>
 	        </label>
-
-	        <% if (fieldSchema.type === "static") { %>
+	        <%% if (fieldSchema.type === "static") { %>
 	            <!-- Поле типа "Статик" -->
-	            <input type="hidden" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" data-test="<%= testId %>">
-	            <p id="<%= controlId %>" class="form-control-static" data-test="<%= testId %>"><%= fieldData %></p>
-	        <% } %>
-
-	        <% if (fieldSchema.type === "text") { %>
+	            <input type="hidden" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>">
+	            <p id="<%%= controlId %>" class="form-control-static"><%%= fieldData %></p>
+	        <%% } %>
+	        <%% if (fieldSchema.type === "text") { %>
 	            <!-- Поле типа "Строка" -->
-	            <input type="text" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" class="form-control" data-test="<%= testId %>">
-	        <% } %>
-
-	        <% if (fieldSchema.type === "password") { %>
+	            <input type="text" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>" class="form-control">
+	        <%% } %>
+	        <%% if (fieldSchema.type === "password") { %>
 	            <!-- Поле типа "Пароль" -->
-	            <input type="password" name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" class="form-control" data-test="<%= testId %>">
-	        <% } %>
-
-	        <% if (fieldSchema.type === "textarea") { %>
+	            <input type="password" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>" class="form-control">
+	        <%% } %>
+	        <%% if (fieldSchema.type === "textarea") { %>
 	            <!-- Поле типа "Текст" -->
-	            <textarea name="<%= controlId %>" id="<%= controlId %>" value="<%= fieldData %>" class="form-control" rows="8" data-test="<%= testId %>"><%= fieldData %></textarea>
-	        <% } %>
-
-	        <% if (fieldSchema.type === "radio") { %>
+	            <textarea name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>" class="form-control" rows="8"><%%= fieldData %></textarea>
+	        <%% } %>
+	        <%% if (fieldSchema.type === "radio") { %>
 	            <!-- Поле типа "Радио" -->
 	            <div class="row">
 	                <div class="col-sm-12">
-	                    <% var disabled = fieldSchema.disabled ? "disabled" : "" %>
+	                    <%% var disabled = fieldSchema.disabled ? "disabled" : "" %>
 	                    <label class="radio-inline">
-	                        <input type="radio" name="<%= controlId %>" id="<%= controlId %>" value="" <%= !fieldData ? "checked" : "" %> <%= disabled %> data-test="<%= testId %>">
-	                        <span><%= fieldSchema.values[0].title %></span>
+	                        <input type="radio" name="<%%= controlId %>" id="<%%= controlId %>" value="" <%%= !fieldData ? "checked" : "" %> <%%= disabled %>>
+	                        <span><%%= fieldSchema.values[0].title %></span>
 	                    </label>
-	                    <% $.each(fieldSchema.values, function(id, value) { %>
-	                        <% var checked = +fieldData === +value.id ? "checked" : "" %>
+	                    <%% $.each(fieldSchema.values, function(id, value) { %>
+	                        <%% var checked = +fieldData === +value.id ? "checked" : "" %>
 	                        <label class="radio-inline">
-	                            <input type="radio" name="<%= controlId %>" id="<%= controlId %>" value="<%= value.id %>" <%= checked %> <%= disabled %> data-test="<%= testId %>">
-	                            <span><%= value.title %></span>
+	                            <input type="radio" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= value.id %>" <%%= checked %> <%%= disabled %>>
+	                            <span><%%= value.title %></span>
 	                        </label>
-	                    <% }); %>
+	                    <%% }); %>
 	                </div>
 	            </div>
-	        <% } %>
-
-	        <% if (fieldSchema.type === "select") { %>
+	        <%% } %>
+	        <%% if (fieldSchema.type === "select") { %>
 	            <!-- Поле типа "Селект" -->
-	            <select <%= fieldSchema.multiple ? "multiple" : "" %> name="<%= controlId %>" id="<%= controlId %>" class="form-control" data-test="<%= testId %>">
-	                <% if (!fieldSchema.multiple) { %>
+	            <select <%%= fieldSchema.multiple ? "multiple" : "" %> name="<%%= controlId %>" id="<%%= controlId %>" class="form-control">
+	                <%% if (!fieldSchema.multiple) { %>
 	                    <option></option>
-	                <% } %>
-	                <% $.log("fieldData", fieldData); %>
-	                <% $.log("fieldSchema.values", fieldSchema.values); %>
-	                <% $.each(fieldSchema.values, function(id, value) { %>
-	                    <% var selected = (fieldSchema.multiple && _.indexOf(fieldData, value.id) !== -1) || (+fieldData === +value.id) ? "selected" : "" %>
-	                    <option value="<%= value.id %>" <%= selected %>><%= value.title %></option>
-	                <% }); %>
+	                <%% } %>
+	                <%% $.log("fieldData", fieldData); %>
+	                <%% $.log("fieldSchema.values", fieldSchema.values); %>
+	                <%% $.each(fieldSchema.values, function(id, value) { %>
+	                    <%% var selected = (fieldSchema.multiple && _.indexOf(fieldData, value.id) !== -1) || (+fieldData === +value.id) ? "selected" : "" %>
+	                    <option value="<%%= value.id %>" <%%= selected %>><%%= value.title %></option>
+	                <%% }); %>
 	            </select>
-	        <% } %>
-
+	        <%% } %>
 	    </div>
 	</div>
-
-<% } else { %>
-
+<%% } else { %>
     <!-- Кнопка "Отправить" -->
     <div class="col-sm-12">
         <div class="form-group">
-            <button type="submit" class="btn btn-primary" data-test="<%= testId %>"><%= fieldTitle %></button>
+            <button type="submit" class="btn btn-primary"><%%= fieldTitle %></button>
         </div>
     </div>
-
-<% } %>
+<%% } %>
