@@ -3,7 +3,7 @@
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
-define(["jquery.form", "underscore"], function() {
+define(["jquery", "jquery.form", "underscore"], function($) {
 
     "use strict";
 
