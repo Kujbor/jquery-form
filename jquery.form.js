@@ -1,5 +1,5 @@
 /*
- * jquery.form.js - jQuery plugin for Twitter Bootstrap 3 framework forms
+ * jquery.form.js - jQuery plugin for generation and processing Twitter Bootstrap 3 forms
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2015: CubeComp Development
  */
