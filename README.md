@@ -1,7 +1,7 @@
 jquery.form.js
 ===========
 
-jQuery plugin for generation and processing Twitter Bootstrap forms
+jQuery plugin for generation and processing Twitter Bootstrap v3.3.5 framework forms
 
 Usage
 -----
