@@ -25,7 +25,7 @@ require(["jquery", "jquery.form", "underscore"], function($) {
 
         $.fn.form.template = _.template(response);
 
-        $(div).append($("<form>").form({
+        $("<form>").form({
             first_name: {
                 title: "First name",
                 required: true,
