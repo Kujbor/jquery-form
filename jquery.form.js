@@ -9,29 +9,28 @@ define(["jquery", "bootstrap"], function($) {
 
 
     /**
-     * Конструктор формы
+     * Form constructor
      *
-     * @param {Object} fieldsSchema Структура полей формы в JSON формате
-     * @param {Object} fieldsData Данные полей формы в JSON формате
-     * @returns {Object} Возвращает jQuery объект с расширенными методами
+     * @param {Object} object fith structure of the form fields
+     * @param {Object} object fith initialization data of the form fields
+     * @param {Function} function to call upon successful validation
+     * @returns {Object} jQuery object with advanced methods
      */
 
     $.fn.form = function(fieldsSchema, fieldsData, callback) {
 
-        /**
-         * Проверяем не передан ли вторым параметром callback
-         */
+        // Checking for the second parameter may be callback
         if (!callback && typeof fieldsData === "function") {
             callback = fieldsData;
         }
 
 
         /**
-         * Метод генерирующий контролы формы
+         * The method of generating form controls
          *
-         * @returns {Object} Возвращает jQuery объект с расширенными методами
+         * @returns {Object} jQuery object with advanced methods
          */
-        this._render = function() {
+        this.renderFields = function() {
 
             var $this = this;
 
@@ -48,7 +47,7 @@ define(["jquery", "bootstrap"], function($) {
                 $.each(fieldsSchema, function(fieldId, fieldSchema) {
 
                     var controlId = parent ? parent + "-" + fieldId : fieldId;
-                    var fieldData = $this._getFieldValue(controlId, fieldsData);
+                    var fieldData = $this.getFieldValue(controlId, fieldsData);
 
                     if (fieldSchema.type === "group") {
 
@@ -96,14 +95,12 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Метод проверяющий валидность формы и вфзывающий ошибки или callback
-         *
-         * @returns {boolean} Возвращает результат проверки
+         * The method of checking the validity of the form and causes errors or callback
          */
-        this._submit = function() {
+        this.onSubmit = function() {
 
             var $this = this;
-            var fieldsData = this._toJSON();
+            var fieldsData = this.toJSON();
 
             $this.find(".form-group.has-error").removeClass("has-error").tooltip("destroy");
 
@@ -114,7 +111,7 @@ define(["jquery", "bootstrap"], function($) {
                 $.each(fieldsSchema, function(fieldId, fieldSchema) {
 
                     var controlId = parent ? parent + "-" + fieldId : fieldId;
-                    var fieldData = $this._getFieldValue(controlId, fieldsData);
+                    var fieldData = $this.getFieldValue(controlId, fieldsData);
 
                     if (fieldSchema.type === "group") {
 
@@ -146,7 +143,7 @@ define(["jquery", "bootstrap"], function($) {
             } else {
 
                 setTimeout(function() {
-                    errors.reverse().map($this._error);
+                    errors.reverse().map($this.throwError);
                 }, 150);
             }
 
@@ -155,12 +152,12 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Метод вешающий идентификатор ошибки на поле формы
+         * The method of hanging the error identifier in the form field
          *
-         * @param {object} elem jQuery объект поля формы
-         * @param {string} text Текст ошибки
+         * @param {Object} elem jQuery object of the form field
+         * @param {String} text The text of the error
          */
-        this._error = function($elem, text) {
+        this.throwError = function($elem, text) {
 
             var $formGroup = $elem.focus().closest(".form-group").addClass("has-error");
 
@@ -175,16 +172,18 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Метод возвращающий значение контейнера из схемы данных формы
+         * The method returns the value of the form field from the form data object
          *
-         * @returns {object} Возвращает объект с данными о поле формы
+         * @param {String} field Form field id
+         * @param {Object} data Form data object
+         * @returns {Any} The value of a form field
          */
-        this._getFieldValue = function(field, data) {
+        this.getFieldValue = function(field, data) {
 
             var fieldPath = field.split("-");
 
             if (fieldPath.length > 1) {
-                return data ? this._getFieldValue(fieldPath.slice(1).join("-"), data[fieldPath[0]]) : "";
+                return data ? this.getFieldValue(fieldPath.slice(1).join("-"), data[fieldPath[0]]) : "";
             } else {
                 return data && data[field] !== null ? data[field] : "";
             }
@@ -192,11 +191,11 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Метод удаляющий из формы все контролы
+         * The method removing all form controls
          *
-         * @returns {object} Возвращает jQuery объект с расширенными методами
+         * @returns {Object} jQuery object with advanced methods
          */
-        this._clear = function() {
+        this.removeFields = function() {
 
             this.find("*").remove();
 
@@ -205,11 +204,11 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Метод возвращающий текущие данные полей формы в формате JSON
+         * The method returns the current data form fields
          *
-         * @returns {object}
+         * @returns {Object} The form data object
          */
-        this._toJSON = function() {
+        this.toJSON = function() {
 
             var form = this;
 
@@ -224,7 +223,7 @@ define(["jquery", "bootstrap"], function($) {
                 var field = null;
                 var value = this.value;
 
-                // Формируем путь к переменной в массиве по ее имени
+                // Forming path to a variable in the array by its name
                 $.each(names, function() {
 
                     field = this;
@@ -245,10 +244,12 @@ define(["jquery", "bootstrap"], function($) {
                         parent[field].push(value);
 
                     } else {
+
                         parent[field] = [value];
                     }
 
                 } else {
+
                     parent[field] = value;
                 }
             });
@@ -256,6 +257,6 @@ define(["jquery", "bootstrap"], function($) {
             return formJSON;
         };
 
-        return this._clear()._render().off("submit").on("submit", this._submit.bind(this));
+        return this.removeFields().renderFields().off("submit").on("submit", this.onSubmit.bind(this));
     };
 });
