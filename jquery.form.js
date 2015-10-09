@@ -3,7 +3,7 @@
  * Author Oleg Taranov aka Kujbor
  * Copyright (C) 2013: CubeComp Development
  */
-define(["jquery", "underscore", "bootstrap"], function($) {
+define(["jquery", "bootstrap"], function($) {
 
     "use strict";
 
@@ -43,7 +43,7 @@ define(["jquery", "underscore", "bootstrap"], function($) {
 
             var needToUpdateConditionsFields = [];
 
-            function makeControls(fieldsSchema, parent) {
+            (function makeControls(fieldsSchema, parent) {
 
                 $.each(fieldsSchema, function(fieldId, fieldSchema) {
 
@@ -59,56 +59,37 @@ define(["jquery", "underscore", "bootstrap"], function($) {
                         var $field = $row.append($this.form.template({
                             controlId: controlId,
                             fieldSchema: fieldSchema,
-                            fieldData: typeof fieldData === "string" ? fieldData.replace(/"/g, "\"") : fieldData,
-                            fieldDataEncoded: fieldData ? $.getProtectedValue(fieldData) : null,
-                            fieldTitle: fieldSchema.title,
-                            testId: $this.closest("form").attr("data-test") + "-" + controlId
+                            fieldData: typeof fieldData === "string" ? fieldData.replace(/"/g, "&quot;") : fieldData,
+                            fieldTitle: fieldSchema.title
                         }));
 
                         if (fieldSchema.show_if) {
 
-                            for (var i in fieldSchema.show_if) {
+                            $.each(fieldSchema.show_if, function(field, values) {
 
-                                (function(i) {
+                                $this.on("input change", "#" + field, function() {
 
-                                    $this.on("input change", "#" + i, function() {
+                                    if (values.indexOf(this.value) !== -1) {
 
-                                        if (fieldSchema.show_if[i].indexOf(this.value) !== -1) {
+                                        $field.closest(".form-group").show();
 
-                                            $field.closest(".form-group").show();
+                                    } else {
 
-                                        } else {
+                                        $field.closest(".form-group").hide();
+                                    }
+                                });
 
-                                            $field.closest(".form-group").hide();
-                                        }
-
-                                    });
-
-                                    needToUpdateConditionsFields.push($this.find("#" + i));
-
-                                })(i);
-                            }
+                                needToUpdateConditionsFields.push($this.find("#" + field));
+                            });
                         }
                     }
                 });
 
-            }
-
-            makeControls(fieldsSchema);
+            })(fieldsSchema);
 
             $.each(needToUpdateConditionsFields, function() {
                 this.trigger("change");
             });
-
-            if (!$this.find("[type='submit']").length) {
-
-                makeControls({
-                    submit: {
-                        type: "submit",
-                        title: "Отправить"
-                    }
-                });
-            }
 
             return $this;
         };
@@ -243,10 +224,6 @@ define(["jquery", "underscore", "bootstrap"], function($) {
                 var field = null;
                 var value = this.value;
 
-                try {
-                    value = $.getCleanValue(this.value);
-                } catch (e) {}
-
                 // Формируем путь к переменной в массиве по ее имени
                 $.each(names, function() {
 
@@ -280,65 +257,5 @@ define(["jquery", "underscore", "bootstrap"], function($) {
         };
 
         return this._clear()._render().off("submit").on("submit", this._submit.bind(this));
-    };
-
-
-    /**
-     * Метод получения значения, готового к записи в строку из любого типа данных
-     *
-     * @param {any} value - любые данные для шифрования
-     * @returns {string} - строка с зашифрованными данными
-     */
-    $.getProtectedValue = function(value) {
-        return $.htmlEncode(JSON.stringify(value));
-    };
-
-
-    /**
-     * Метод получения реального значения из зашифрованной строки
-     *
-     * @param {string} value - строка с зашифрованными данными
-     * @returns {any} - реальное значение любого типа
-     */
-    $.getCleanValue = function(value) {
-        return JSON.parse($.htmlDecode(value));
-    };
-
-
-    /**
-     * Метод настройки установки защищенного значения или чтения реального из контрола
-     *
-     * @param {any} newValue если переданы данные значение будет записано в контрол
-     * @returns {any} значение контрола
-     */
-    $.fn.protectedValue = function(newValue) {
-
-        if (typeof newValue === "undefined") {
-            return this.val() ? $.getCleanValue((this.val())) : "";
-        } else {
-            return this.val($.getProtectedValue(newValue ? newValue : ""));
-        }
-    };
-
-
-    /**
-     * Метод экранирования данных
-     *
-     * @param {string} value произвольный текст
-     * @returns {string} - экранированный текст
-     */
-    $.htmlEncode = function(data) {
-        return $("<div />").text(data).html().replace(/"/g, "&quot;");
-    };
-
-
-    /**
-     * Метод расшифровки экранированных данных
-     *
-     * @param {string} value экранированный текст
-     * @returns {string} - расшифрованный текст
-     */
-    $.htmlDecode = function(data) {
-        return $("<div />").html(data.replace(/&quot;/g, '"')).text();
     };
 });
