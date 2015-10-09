@@ -42,7 +42,7 @@ require(["jquery", "jquery.form", "underscore"], function($) {
             last_name: "Taranov"
         }, function(data) {
 
-            $("<p class='text-success'>").text(JSON.stringify(data)).insertAfter(this);
+            $("<p>").text(JSON.stringify(data)).insertAfter(this);
 
         }).appendTo("body");
     });
