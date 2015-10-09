@@ -25,7 +25,7 @@ require(["jquery", "jquery.form", "underscore"], function($) {
 
         $.fn.form.template = _.template(response);
 
-        $("<form class='container'>").form({
+        $(div).append($("<form>").form({
             first_name: {
                 title: "First name",
                 required: true,
@@ -46,7 +46,7 @@ require(["jquery", "jquery.form", "underscore"], function($) {
 
             $("<p>").text(JSON.stringify(data)).insertAfter(this);
 
-        }).appendTo("body");
+        }).appendTo($("<div class='container'>").appendTo($("body")));
     });
 });
 ```
