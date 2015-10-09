@@ -1,5 +1,5 @@
 <%% if (fieldSchema.type === "hidden") { %>
-    <!-- Скрытое поле -->
+    <!-- Hidden field -->
     <input type="hidden" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>">
 <%% } else if (fieldSchema.type !== "submit") { %>
 	<div class="col-sm-<%%= fieldSchema.size ? fieldSchema.size : 6 %>">
@@ -11,24 +11,24 @@
 	            <%% } %>
 	        </label>
 	        <%% if (fieldSchema.type === "static") { %>
-	            <!-- Поле типа "Статик" -->
+	            <!-- Static field -->
 	            <input type="hidden" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>">
 	            <p id="<%%= controlId %>" class="form-control-static"><%%= fieldData %></p>
 	        <%% } %>
 	        <%% if (fieldSchema.type === "text") { %>
-	            <!-- Поле типа "Строка" -->
+	            <!-- Text field -->
 	            <input type="text" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>" class="form-control">
 	        <%% } %>
 	        <%% if (fieldSchema.type === "password") { %>
-	            <!-- Поле типа "Пароль" -->
+	            <!-- Password field -->
 	            <input type="password" name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>" class="form-control">
 	        <%% } %>
 	        <%% if (fieldSchema.type === "textarea") { %>
-	            <!-- Поле типа "Текст" -->
+	            <!-- Full texxt field -->
 	            <textarea name="<%%= controlId %>" id="<%%= controlId %>" value="<%%= fieldData %>" class="form-control" rows="8"><%%= fieldData %></textarea>
 	        <%% } %>
 	        <%% if (fieldSchema.type === "radio") { %>
-	            <!-- Поле типа "Радио" -->
+	            <!-- Radiobutton field -->
 	            <div class="row">
 	                <div class="col-sm-12">
 	                    <%% var disabled = fieldSchema.disabled ? "disabled" : "" %>
@@ -47,7 +47,7 @@
 	            </div>
 	        <%% } %>
 	        <%% if (fieldSchema.type === "select") { %>
-	            <!-- Поле типа "Селект" -->
+	            <!-- Select field -->
 	            <select <%%= fieldSchema.multiple ? "multiple" : "" %> name="<%%= controlId %>" id="<%%= controlId %>" class="form-control">
 	                <%% if (!fieldSchema.multiple) { %>
 	                    <option></option>
@@ -63,7 +63,7 @@
 	    </div>
 	</div>
 <%% } else { %>
-    <!-- Кнопка "Отправить" -->
+    <!-- Submit button -->
     <div class="col-sm-12">
         <div class="form-group">
             <button type="submit" class="btn btn-primary"><%%= fieldTitle %></button>
