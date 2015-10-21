@@ -12,7 +12,7 @@ Usage
 * data — fith initialization data of the form fields
 * callback — function to call upon successful validation
 
-Before using the generator, you must assign a form templates functions (`$.fn.form.templates = [function, ...]`), for example you can use underscore.js library and templates.html from this repository.
+Before using, you must assign templates functions (`$.fn.form.templates = [function, ...]`), for example you can use underscore.js library and templates.html from this repository.
 
 #### Usage example
 
