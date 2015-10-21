@@ -12,7 +12,9 @@ Usage
 * data — fith initialization data of the form fields
 * callback — function to call upon successful validation
 
-Before using, you must assign templates functions (`$.fn.form.templates = [function, ...]`). For example, you can use underscore.js library and templates.html from this repository.
+Before using, you must assign templates functions (`$.fn.form.templates = [function, ...]`).
+
+For example, you can use underscore.js library and templates.html from this repository.
 
 #### Usage example
 
