@@ -16,7 +16,6 @@ define(["jquery", "bootstrap"], function($) {
      * @param {Function} function to call upon successful validation
      * @returns {Object} jQuery object with advanced methods
      */
-
     $.fn.form = function(schema, data, callback) {
 
         // Checking for the second parameter may be callback
