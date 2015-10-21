@@ -1,3 +1,4 @@
+<!-- Controls wrapper -->
 <script type="text/html" data-forms-template="wrapper">
     <div class="col-sm-<%= schema.size ? schema.size : 6 %>">
         <div class="form-group">
@@ -12,33 +13,40 @@
     </div>
 </script>
 
+<!-- Header -->
 <script type="text/html" data-forms-template="header" data-wrapped="false">
     <div class="col-sm-12">
         <h4><%= title %></h4>
     </div>
 </script>
 
+<!-- Hidden field -->
 <script type="text/html" data-forms-template="hidden" data-wrapped="false">
     <input type="hidden" name="<%= id %>" id="<%= id %>" value="<%= value %>">
 </script>
 
+<!-- Static field -->
 <script type="text/html" data-forms-template="static">
     <input type="hidden" name="<%= id %>" id="<%= id %>" value="<%= value %>">
     <p id="<%= id %>" class="form-control-static"><%= value %></p>
 </script>
 
+<!-- Text field -->
 <script type="text/html" data-forms-template="text">
     <input type="text" name="<%= id %>" id="<%= id %>" value="<%= value %>" <%= schema.mask ? "data-mask='schema.mask'" : "" %> class="form-control">
 </script>
 
+<!-- Password field -->
 <script type="text/html" data-forms-template="password">
     <input type="password" name="<%= id %>" id="<%= id %>" value="<%= value %>" class="form-control">
 </script>
 
+<!-- Full text field -->
 <script type="text/html" data-forms-template="textarea">
     <textarea name="<%= id %>" id="<%= id %>" value="<%= value %>" class="form-control" rows="8"><%= value %></textarea>
 </script>
 
+<!-- Radiobutton field -->
 <script type="text/html" data-forms-template="radio">
     <div class="row">
         <div class="col-sm-12">
@@ -53,6 +61,7 @@
     </div>
 </script>
 
+<!-- Checkbox field -->
 <script type="text/html" data-forms-template="checkbox">
     <div class="row">
         <div class="col-sm-12">
@@ -67,6 +76,7 @@
     </div>
 </script>
 
+<!-- Select field -->
 <script type="text/html" data-forms-template="select">
     <select <%= schema.multiple ? "multiple" : "" %> name="<%= id %>" id="<%= id %>" class="form-control">
         <% if (!schema.multiple) { %>
@@ -79,6 +89,7 @@
     </select>
 </script>
 
+<!-- Submit button -->
 <script type="text/html" data-forms-template="submit" data-wrapped="false">
     <div class="col-sm-12">
         <div class="form-group">
