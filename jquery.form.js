@@ -42,7 +42,7 @@ define(["jquery", "bootstrap"], function($) {
                 schema = $.extend({}, schema, {
                     submit: {
                         type: "submit",
-                        title: "Submit &raquo;"
+                        title: "Submit"
                     }
                 });
             }
@@ -72,7 +72,7 @@ define(["jquery", "bootstrap"], function($) {
                         if (!$this.form.templates[schema.type].wrapped) {
                             $field = $(dataset.control).appendTo($row);
                         } else {
-                            $field = $($this.form.templates.wrapper(dataset)).appendTo($row).find("[name]");
+                            $field = $($this.form.templates.wrapper(dataset)).appendTo($row).find("#" + id);
                         }
 
                         if (schema.show_if) {
@@ -135,6 +135,10 @@ define(["jquery", "bootstrap"], function($) {
                 var parent = null;
                 var field = null;
                 var value = this.value;
+
+                try {
+                    value = JSON.parse(value);
+                } catch (e) {}
 
                 // Forming path to a variable in the array by its name
                 $.each(names, function() {
