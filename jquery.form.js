@@ -63,7 +63,16 @@ define(["jquery", "bootstrap"], function($) {
                         var $field, dataset = {
                             id: id,
                             schema: schema,
-                            value: typeof value === "string" ? value.replace(/"/g, "&quot;") : value,
+                            value: typeof value === "string" ? value.replace(/[&<>"'\/]/g, function(s) {
+                                return {
+                                    "&": "&amp;",
+                                    "<": "&lt;",
+                                    ">": "&gt;",
+                                    '"': "&quot;",
+                                    "'": "&#39;",
+                                    "/": "&#x2F;"
+                                }[s];
+                            }) : value,
                             title: schema.title
                         };
 
