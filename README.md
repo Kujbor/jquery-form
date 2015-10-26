@@ -8,8 +8,8 @@ Usage
 
 #### jQuery#form(schema, data, callback)
 
-* schema — object fith structure of the form fields
-* data — fith initialization data of the form fields
+* schema — object with structure of the form fields
+* data — object with initialization data of the form fields
 * callback — function to call upon successful validation
 
 Before using, you must assign templates functions (`$.fn.form.templates = [function, ...]`)
