@@ -51,7 +51,7 @@
     <div class="row">
         <div class="col-sm-12">
             <% $.each(schema.values, function() { %>
-                <% var checked = +value === +this.id ? "checked" : "" %>
+                <% var checked = value === JSON.parse(this.id) ? "checked" : "" %>
                 <label class="radio-inline">
                     <input type="radio" name="<%= id %>" id="<%= id %>" value="<%= this.id %>" <%= checked %>>
                     <span><%= this.title %></span>
