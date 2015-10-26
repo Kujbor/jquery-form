@@ -89,49 +89,6 @@
     </select>
 </script>
 
-<!-- Search field -->
-<script type="text/html" data-forms-template="search">
-    <i class="fa fa-search search-pic"></i>
-    <input type="search" name="<%= id %>" id="<%= id %>" value="<%= value %>" class="form-control">
-</script>
-
-<!-- List field -->
-<script type="text/html" data-forms-template="list">
-    <input type="hidden" name="<%= id %>" id="<%= id %>" value="<%= value %>">
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover table-condensed">
-            <thead>
-                <tr>
-                    <% $.each(schema.fields, function(field, title) { %>
-                        <th data-field="<%= field %>" width="<%= 99 / Object.keys(schema.fields).length %>%"><%= title %></th>
-                    <% }); %>
-                    <th width="1%">
-                        <button type="button" data-form-field-list-row-add class="btn btn-default btn-xs">
-                            <i class="fa fa-plus text-success"></i>
-                            <span>Добавить</span>
-                        </button>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (value) $.each(value, function() { %>
-                    <tr>
-                        <% $.each(this, function(field, cell) { %>
-                            <td data-field="<%= field %>"><%= cell %></td>
-                        <% }); %>
-                        <td>
-                            <button type="button" data-form-field-list-row-remove class="btn btn-default btn-xs">
-                                <i class="fa fa-times text-danger"></i>
-                                <span>Удалить</span>
-                            </button>
-                        </td>
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
-    </div>
-</script>
-
 <!-- Submit button -->
 <script type="text/html" data-forms-template="submit" data-wrapped="false">
     <div class="col-sm-12">
