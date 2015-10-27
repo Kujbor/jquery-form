@@ -25,15 +25,15 @@ require(["jquery.form", "underscore"], function($) {
 
     $.get("templates.html", function(response) {
 
-		$.fn.form.templates = $(response).filter("[data-forms-template]").get()
-		.reduce(function(mem, elem, id, templates) {
+	$.fn.form.templates = $(response).filter("[data-forms-template]").get()
+	.reduce(function(mem, elem, id, templates) {
 
-			mem[elem.dataset.formsTemplate] = _.template($(elem).html());
-			mem[elem.dataset.formsTemplate].wrapped = elem.dataset.wrapped !== "false";
+		mem[$(elem).data("forms-template")] = _.template($(elem).html());
+		mem[$(elem).data("forms-template")].wrapped = $(elem).data("wrapped") !== false;
 
-			return mem;
+		return mem;
 
-		}, {});
+	}, {});
 
         $("<form>").form({
             first_name: {
