@@ -28,10 +28,10 @@ require(["jquery.form", "underscore"], function($) {
 	$.fn.form.templates = $(response).filter("[data-forms-template]").get()
 	.reduce(function(mem, elem, id, templates) {
 
-		mem[$(elem).data("forms-template")] = _.template($(elem).html());
-		mem[$(elem).data("forms-template")].wrapped = $(elem).data("wrapped") !== false;
+	mem[$(elem).data("forms-template")] = _.template($(elem).html());
+	mem[$(elem).data("forms-template")].wrapped = $(elem).data("wrapped") !== false;
 
-		return mem;
+	return mem;
 
 	}, {});
 
