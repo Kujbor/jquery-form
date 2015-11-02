@@ -26,7 +26,7 @@ require(["jquery.form", "underscore"], function($) {
 	$.get("templates.html", function(response) {
 
 		$.fn.form.templates = $(response).filter("[data-forms-template]").get()
-		.reduce(function(mem, elem, id, templates) {
+		.reduce(function(mem, elem) {
 
 			mem[$(elem).data("forms-template")] = _.template($(elem).html());
 			mem[$(elem).data("forms-template")].wrapped = $(elem).data("wrapped") !== false;
