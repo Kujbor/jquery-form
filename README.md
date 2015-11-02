@@ -21,54 +21,54 @@ For example, you can use underscore.js library and templates.html from this repo
 ```javascript
 require(["jquery.form", "underscore"], function($) {
 
-    "use strict";
+	"use strict";
 
-    $.get("templates.html", function(response) {
+	$.get("templates.html", function(response) {
 
-	$.fn.form.templates = $(response).filter("[data-forms-template]").get()
-	.reduce(function(mem, elem, id, templates) {
+		$.fn.form.templates = $(response).filter("[data-forms-template]").get()
+		.reduce(function(mem, elem, id, templates) {
 
-	mem[$(elem).data("forms-template")] = _.template($(elem).html());
-	mem[$(elem).data("forms-template")].wrapped = $(elem).data("wrapped") !== false;
+			mem[$(elem).data("forms-template")] = _.template($(elem).html());
+			mem[$(elem).data("forms-template")].wrapped = $(elem).data("wrapped") !== false;
 
-	return mem;
+			return mem;
 
-	}, {});
+		}, {});
 
-        $("<form>").form({
-            first_name: {
-                title: "First name",
-                required: true,
-                type: "text"
-            },
-            last_name: {
-                title: "Last name",
-                type: "text"
-            },
-            gender: {
-                title: "Gender",
-                type: "select",
-                values: [{
-                    id: 1,
-                    title: "man"
-                }, {
-                    id: 2,
-                    title: "woman"
-                }],
-                required: true,
-                show_if: "data.last_name"
-            },
-            submit: {
-                title: "Next &raquo;",
-                type: "submit"
-            }
-        }, {
-            first_name: "Oleg"
-        }, function(data) {
+		$("<form>").form({
+			first_name: {
+				title: "First name",
+				required: true,
+				type: "text"
+			},
+			last_name: {
+				title: "Last name",
+				type: "text"
+			},
+			gender: {
+				title: "Gender",
+				type: "select",
+				values: [{
+					id: 1,
+					title: "man"
+				}, {
+					id: 2,
+					title: "woman"
+				}],
+				required: true,
+				show_if: "data.last_name"
+			},
+			submit: {
+				title: "Next &raquo;",
+				type: "submit"
+			}
+		}, {
+			first_name: "Oleg"
+		}, function(data) {
 
-            $("<p>").text(JSON.stringify(data)).insertAfter(this);
+			$("<p>").text(JSON.stringify(data)).insertAfter(this);
 
-        }).appendTo($("<div class='container'>").appendTo($("body")));
-    });
+		}).appendTo($("<div class='container'>").appendTo($("body")));
+	});
 });
 ```
