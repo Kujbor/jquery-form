@@ -49,14 +49,14 @@ require(["jquery.form", "underscore"], function($) {
 				title: "Gender",
 				type: "select",
 				values: [{
-					id: "1",
+					id: 1,
 					title: "man"
 				}, {
-					id: "2",
+					id: 2,
 					title: "woman"
 				}],
 				required: true,
-				show_if: "data.last_name"
+				show_if: "data.last_name === 'Taranov'"
 			},
 			submit: {
 				title: "Next &raquo;",
