@@ -3,12 +3,12 @@
     <div class="col-sm-<%= schema.size ? schema.size : 6 %>">
         <div class="form-group">
             <label class="control-label" for="<%= id %>">
-                <span><%= schema.type === "search" ? "Поиск: " + title : title %></span>
-                <% if (schema.required === true) { %>
+                <span><%= title %></span>
+                <% if (schema.required) { %>
                     <span class="text-danger">*</span>
                 <% } %>
             </label>
-            <%= control %>
+            <%= $control %>
         </div>
     </div>
 </script>
@@ -48,7 +48,7 @@
 
 <!-- Full text field -->
 <script type="text/html" data-forms-template="textarea">
-    <textarea name="<%= id %>" id="<%= id %>" value="<%= value %>" class="form-control" rows="8"><%= value %></textarea>
+    <textarea name="<%= id %>" id="<%= id %>" value="<%= value %>" rows="8" class="form-control"><%= value %></textarea>
 </script>
 
 <!-- Radiobutton field -->
@@ -56,7 +56,7 @@
     <div class="row">
         <div class="col-sm-12">
             <% $.each(schema.values, function() { %>
-                <% var checked = value === JSON.parse(this.id) ? "checked" : "" %>
+                <% var checked = value === this.id ? "checked" : "" %>
                 <label class="radio-inline">
                     <input type="radio" name="<%= id %>" id="<%= id %>" value="<%= this.id %>" <%= checked %>>
                     <span><%= this.title %></span>
@@ -71,12 +71,12 @@
     <div class="row">
         <div class="col-sm-12">
             <% $.each(schema.values, function() { %>
-                <% var checked = value && value.indexOf(JSON.parse(this.id)) !== -1 ? "checked" : "" %>
+                <% var checked = value && value.indexOf(this.id) !== -1 ? "checked" : "" %>
                 <label class="checkbox-inline">
                     <input type="checkbox" name="<%= id %>" id="<%= id %>" value="<%= this.id %>" <%= checked %>>
                     <span><%= this.title %></span>
                 </label>
-            <% }); %>
+            <% }) %>
         </div>
     </div>
 </script>
@@ -88,9 +88,9 @@
             <option></option>
         <% } %>
         <% $.each(schema.values, function() { %>
-            <% var selected = (schema.multiple && value && value.indexOf(JSON.parse(this.id)) !== -1) || (!schema.multiple && value === JSON.parse(this.id)) ? "selected" : "" %>
+            <% var selected = (schema.multiple && value && value.indexOf(this.id) !== -1) || (!schema.multiple && value === this.id) ? "selected" : "" %>
             <option value="<%= this.id %>" <%= selected %>><%= this.title %></option>
-        <% }); %>
+        <% }) %>
     </select>
 </script>
 
