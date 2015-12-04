@@ -9,10 +9,10 @@ define(["jquery", "bootstrap"], function($) {
 
 
     /**
-     * Form constructor
+     * Form builder
      *
-     * @param {Object} object fith structure of the form fields
-     * @param {Object} object fith initialization data of the form fields
+     * @param {Object} object with structure of the form's fields
+     * @param {Object} object with initialization data of the form's fields
      * @param {Function} function to call upon successful validation
      * @returns {Object} jQuery object with advanced methods
      */
@@ -23,36 +23,39 @@ define(["jquery", "bootstrap"], function($) {
             callback = data;
         }
 
+        // Checking for the first parameter may be callback
+        if (!data && !callback && typeof schema === "function") {
+            callback = schema;
+        }
+
 
         /**
-         * Method generates form controls
+         * jQuery object of the form
+         */
+        var $form = this;
+
+
+        /**
+         * Method generates form's controls
          *
-         * @param {Object} object fith structure of the form fields
-         * @param {Object} object fith initialization data of the form fields
+         * @param {Object} object with structure of the form's fields
+         * @param {Object} object with initialization data of the form's fields
          * @returns {Object} jQuery object with advanced methods
          */
-        this.render = function(schema, data) {
+        $form.render = function(schema, data) {
 
-            var $this = this;
+            $form.schema = schema;
+            $form.find("*").remove();
+            $form.visiblityConditions = [];
 
-            var $row = $("<div class='row'>").appendTo($this);
-
-            if (!schema.submit) {
-
-                schema = $.extend({}, schema, {
-                    submit: {
-                        type: "submit",
-                        title: "Submit &raquo;"
-                    }
-                });
-            }
+            var $row = $("<div class='row'>").appendTo($form);
 
             (function makeControls(schema, parent) {
 
                 $.each(schema, function(field, schema) {
 
                     var id = parent ? parent + "-" + field : field;
-                    var value = $this.getFieldValue(id, data);
+                    var value = $form.getFieldValue(id, data);
 
                     if (schema.type === "group") {
 
@@ -76,26 +79,28 @@ define(["jquery", "bootstrap"], function($) {
                             title: schema.title
                         };
 
-                        dataset.control = $this.form.templates[schema.type] || $this.form.templates.text;
+                        dataset.control = $form.form.templates[schema.type] || $form.form.templates.text;
                         dataset.$control = dataset.control(dataset);
 
                         if (dataset.control.wrapped) {
-                            $field = $($this.form.templates.wrapper(dataset)).appendTo($row).find("#" + id);
+                            $field = $($form.form.templates.wrapper(dataset)).appendTo($row).find("#" + id);
                         } else {
                             $field = $(dataset.$control).appendTo($row);
                         }
 
                         if (schema.show_if) {
-                            $this.on("input change", function() {
-                                $field.closest(".form-group").parent()[$this.getVisiblityCondition(schema.show_if) ? "show" : "hide"]();
+
+                            $form.visiblityConditions.push({
+                                show_if: schema.show_if,
+                                $field: $field.closest(".form-group").parent()
                             });
                         }
                     }
                 });
 
-            })(schema);
+            })($form.schema);
 
-            return $this.trigger("change");
+            return $form.trigger("change");
         };
 
 
@@ -103,33 +108,33 @@ define(["jquery", "bootstrap"], function($) {
          * Method sets data to form fields
          *
          * @param {Object} form data object
+         * @returns {Object} form's data object
          */
-        this.set = function(data) {
+        $form.set = function(data) {
 
-            var $this = this;
+            $form.find("[name]").each(function() {
 
-            $this.find("[name]").each(function() {
-
-                var value = $this.getFieldValue(this.name, data);
+                var value = $form.getFieldValue(this.name, data);
 
                 if (typeof value !== "undefined") {
 
-                    $(this).val(value).trigger("change");
+                    $(this).val(value);
                 }
+
             });
+
+            return $form.trigger("change");
         };
 
 
         /**
          * Method returns the current data form fields
          *
-         * @returns {Object} form data object
+         * @returns {Object} form's data object
          */
-        this.toJSON = function() {
+        $form.toJSON = function() {
 
-            var $this = this;
-
-            var newData = $this.serializeArray();
+            var newData = $form.serializeArray();
             var formJSON = {};
 
             $.each(newData, function() {
@@ -159,7 +164,7 @@ define(["jquery", "bootstrap"], function($) {
                     obj = obj[this];
                 });
 
-                var $control = $this.find("#" + this.name);
+                var $control = $form.find("#" + this.name);
 
                 if ($control.attr("multiple") || $control.attr("type") === "checkbox") {
 
@@ -188,12 +193,11 @@ define(["jquery", "bootstrap"], function($) {
          *
          * @param {Function} function to call upon successful validation
          */
-        this.validate = function(callback) {
+        $form.validate = function(selfCallback) {
 
-            var $this = this;
-            var data = this.toJSON();
+            var data = $form.toJSON();
 
-            $this.find(".form-group.has-error").removeClass("has-error").tooltip("destroy");
+            $form.find(".form-group.has-error").removeClass("has-error").tooltip("destroy");
 
             var errors = [];
 
@@ -202,7 +206,7 @@ define(["jquery", "bootstrap"], function($) {
                 $.each(schema, function(field, schema) {
 
                     var id = parent ? parent + "-" + field : field;
-                    var value = $this.getFieldValue(id, data);
+                    var value = $form.getFieldValue(id, data);
 
                     if (schema.type === "group") {
 
@@ -214,40 +218,41 @@ define(["jquery", "bootstrap"], function($) {
 
                             for (var i in schema.show_if) {
 
-                                if (!$this.getVisiblityCondition(schema.show_if)) {
+                                if (!$form.getVisiblityCondition(schema.show_if)) {
                                     return true;
                                 }
                             }
                         }
 
-                        errors.push($this.find("#" + id));
+                        errors.push($form.find("#" + id));
                     }
                 });
 
-            })(schema);
+            })($form.schema);
 
             if (!errors.length) {
 
-                callback.call(this, data);
+                (typeof selfCallback === "function" ? selfCallback : callback).call($form, data);
 
             } else {
 
                 setTimeout(function() {
-                    errors.reverse().map($this.throwError);
+                    errors.reverse().map($form.throwError);
                 }, 150);
             }
 
-            return false; // Need for prevent native form`s submit action
+            return false; // Need for prevent native form's submit action
         };
 
 
         /**
-         * Method hangs the error identifier on the form field
+         * Method hangs the error's identifier on the form field
          *
-         * @param {Object} jQuery object of the form field
+         * @param {Object} jQuery object of the form's field
          * @param {String} text of the error
+         * @returns {Object} jQuery object with advanced methods
          */
-        this.throwError = function($elem, text) {
+        $form.throwError = function($elem, text) {
 
             var $group = $elem.focus().closest(".form-group").addClass("has-error");
 
@@ -258,60 +263,52 @@ define(["jquery", "bootstrap"], function($) {
                     trigger: "manual"
                 }).tooltip("show");
             }
+
+            return $form;
         };
 
 
         /**
-         * Method hangs the error identifiers on the form fields
+         * Method hangs the error's identifiers on the form fields
          *
-         * @param {Object} form errors object
-         * @param {Text} previous parents ids - internal method's param
+         * @param {Object} form's error's object
+         * @param {Text} previous parent's ids - internal method's param
+         * @returns {Object} jQuery object with advanced methods
          */
-        this.throwErrors = function(errors, _context) {
+        $form.throwErrors = function(errors, _context) {
 
             for (var i in errors) {
 
                 if (isNaN(errors[i].length)) { // Value is a form errors object
 
-                    this.throwErrors(errors[i], (_context ? _context + "-" : "") + i);
+                    $form.throwErrors(errors[i], (_context ? _context + "-" : "") + i);
 
                 } else { // Value is a field errors array
 
                     for (var j = 0; j < errors[i].length; j++) {
 
-                        this.throwError(this.find("#" + (_context ? _context + "-" : "") + i), errors[i][j]);
+                        $form.throwError($form.find("#" + (_context ? _context + "-" : "") + i), errors[i][j]);
                     }
                 }
             }
+
+            return $form;
         };
 
 
         /**
-         * Method removes all form controls
-         *
-         * @returns {Object} jQuery object with advanced methods
-         */
-        this.clear = function() {
-
-            this.off().find("*").remove();
-
-            return this;
-        };
-
-
-        /**
-         * Method returns value of the form field from the form data object
+         * Method returns value of the form field from the form's data object
          *
          * @param {String} form field id
          * @param {Object} form data object
          * @returns {Any} value of a form field
          */
-        this.getFieldValue = function(field, data) {
+        $form.getFieldValue = function(field, data) {
 
             var fieldPath = field.split("-");
 
             if (fieldPath.length > 1) {
-                return data ? this.getFieldValue(fieldPath.slice(1).join("-"), data[fieldPath[0]]) : undefined;
+                return data ? $form.getFieldValue(fieldPath.slice(1).join("-"), data[fieldPath[0]]) : undefined;
             } else {
                 return data && data[field] !== null ? data[field] : undefined;
             }
@@ -319,17 +316,41 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Method returns curent field visiblity status
+         * Method updates fields visiblity state
          *
-         * @param {String} form field show_if condition
-         * @returns {Boolean} current field visiblity
+         * @returns {Object} jQuery object with advanced methods
          */
-        this.getVisiblityCondition = function(show_if) {
-            return new Function("data", "return " + show_if).call(this, this.toJSON());
+        $form.updateVisiblityState = function() {
+
+            for (var i = 0; i < $form.visiblityConditions.length; i++) {
+
+                var $field = $form.visiblityConditions[i].$field;
+                var show_if = $form.visiblityConditions[i].show_if;
+
+                $field[$form.getVisiblityCondition(show_if) ? "show" : "hide"]();
+            }
+
+            return $form;
         };
 
 
-        // Build form
-        return this.clear().render(schema, data).off("submit").on("submit", this.validate.bind(this, callback));
+        /**
+         * Method returns curent field's visiblity status
+         *
+         * @param {String} form field's show_if condition
+         * @returns {Boolean} current field's visiblity
+         */
+        $form.getVisiblityCondition = function(show_if) {
+            return new Function("data", "return " + show_if).call($form, $form.toJSON());
+        };
+
+
+        // Build the form if form's data exists
+        return $form
+            .render(schema, data)
+            .off("submit", $form.validate)
+            .on("submit", $form.validate)
+            .off("input change", $form.updateVisiblityState)
+            .on("input change", $form.updateVisiblityState);
     };
 });
