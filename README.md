@@ -49,10 +49,10 @@ require(["jquery.form", "underscore"], function($) {
 				title: "Gender",
 				type: "select",
 				values: [{
-					id: 1,
+					id: "1",
 					title: "man"
 				}, {
-					id: 2,
+					id: "2",
 					title: "woman"
 				}],
 				required: true,
