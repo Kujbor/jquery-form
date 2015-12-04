@@ -42,7 +42,7 @@ define(["jquery", "bootstrap"], function($) {
                 schema = $.extend({}, schema, {
                     submit: {
                         type: "submit",
-                        title: "Submit"
+                        title: "Submit &raquo;"
                     }
                 });
             }
@@ -76,19 +76,18 @@ define(["jquery", "bootstrap"], function($) {
                             title: schema.title
                         };
 
-                        dataset.control = $this.form.templates[schema.type](dataset);
+                        dataset.control = $this.form.templates[schema.type] || $this.form.templates.text;
+                        dataset.$control = dataset.control(dataset);
 
-                        if (!$this.form.templates[schema.type].wrapped) {
-                            $field = $(dataset.control).appendTo($row);
-                        } else {
+                        if (dataset.control.wrapped) {
                             $field = $($this.form.templates.wrapper(dataset)).appendTo($row).find("#" + id);
+                        } else {
+                            $field = $(dataset.$control).appendTo($row);
                         }
 
                         if (schema.show_if) {
-
                             $this.on("input change", function() {
-
-                                $field.closest(".form-group")[$this.getVisiblityCondition(schema.show_if) ? "show" : "hide"]();
+                                $field.closest(".form-group").parent()[$this.getVisiblityCondition(schema.show_if) ? "show" : "hide"]();
                             });
                         }
                     }
@@ -96,11 +95,7 @@ define(["jquery", "bootstrap"], function($) {
 
             })(schema);
 
-            $this.find("[name]").each(function() {
-                $(this).trigger("change");
-            });
-
-            return $this;
+            return $this.trigger("change");
         };
 
 
@@ -119,7 +114,7 @@ define(["jquery", "bootstrap"], function($) {
 
                 if (typeof value !== "undefined") {
 
-                    $(this).val(value);
+                    $(this).val(value).trigger("change");
                 }
             });
         };
@@ -146,9 +141,10 @@ define(["jquery", "bootstrap"], function($) {
                 var value = this.value;
 
                 try {
-                    value = JSON.parse(value);
+                    value = ["object", "boolean"].indexOf(typeof JSON.parse(value)) === -1 ? value : JSON.parse(value);
                 } catch (e) {}
 
+                /* <<<<<< TODO: Transform mechanism under the scheme work instead DOM */
                 // Forming path to a variable in the array by its name
                 $.each(names, function() {
 
@@ -180,6 +176,7 @@ define(["jquery", "bootstrap"], function($) {
 
                     parent[field] = value;
                 }
+                /* >>>>>> TODO: Transform mechanism under the scheme work instead DOM */
             });
 
             return formJSON;
@@ -191,7 +188,7 @@ define(["jquery", "bootstrap"], function($) {
          *
          * @param {Function} function to call upon successful validation
          */
-        this.onSubmit = function(callback) {
+        this.validate = function(callback) {
 
             var $this = this;
             var data = this.toJSON();
@@ -240,12 +237,12 @@ define(["jquery", "bootstrap"], function($) {
                 }, 150);
             }
 
-            return false;
+            return false; // Need for prevent native form`s submit action
         };
 
 
         /**
-         * Method hangs the error identifier in the form field
+         * Method hangs the error identifier on the form field
          *
          * @param {Object} jQuery object of the form field
          * @param {String} text of the error
@@ -260,6 +257,31 @@ define(["jquery", "bootstrap"], function($) {
                     title: text,
                     trigger: "manual"
                 }).tooltip("show");
+            }
+        };
+
+
+        /**
+         * Method hangs the error identifiers on the form fields
+         *
+         * @param {Object} form errors object
+         * @param {Text} previous parents ids - internal method's param
+         */
+        this.throwErrors = function(errors, _context) {
+
+            for (var i in errors) {
+
+                if (isNaN(errors[i].length)) { // Value is a form errors object
+
+                    this.throwErrors(errors[i], (_context ? _context + "-" : "") + i);
+
+                } else { // Value is a field errors array
+
+                    for (var j = 0; j < errors[i].length; j++) {
+
+                        this.throwError(this.find("#" + (_context ? _context + "-" : "") + i), errors[i][j]);
+                    }
+                }
             }
         };
 
@@ -308,6 +330,6 @@ define(["jquery", "bootstrap"], function($) {
 
 
         // Build form
-        return this.clear().render(schema, data).off("submit").on("submit", this.onSubmit.bind(this, callback));
+        return this.clear().render(schema, data).off("submit").on("submit", this.validate.bind(this, callback));
     };
 });
