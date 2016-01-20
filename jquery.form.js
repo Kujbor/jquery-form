@@ -18,10 +18,12 @@ define(["jquery", "bootstrap"], function($) {
      */
     $.fn.form = function(schema, data, callback) {
 
+
         // Checking for the second parameter may be callback
         if (!callback && typeof data === "function") {
             callback = data;
         }
+
 
         // Checking for the first parameter may be callback
         if (!data && !callback && typeof schema === "function") {
@@ -189,15 +191,39 @@ define(["jquery", "bootstrap"], function($) {
 
 
         /**
-         * Method checks the validity of the form and causes errors or callback
-         *
-         * @param {Function} function to call upon successful validation
+         * Onsubmit handler
          */
-        $form.validate = function(selfCallback) {
-
-            var data = $form.toJSON();
+        $form.handler = function() {
 
             $form.find(".form-group.has-error").removeClass("has-error").tooltip("destroy");
+
+            var schema = $form.schema;
+            var data = $form.toJSON();
+
+            var errors = $form.validate(schema, data);
+
+            if (errors.length) {
+
+                setTimeout(function() {
+                    errors.reverse().map($form.throwError);
+                }, 150);
+
+            } else {
+
+                callback.call($form, data);
+            }
+
+            return false; // Need for prevent native form's submit action
+        };
+
+
+        /**
+         * Method checks the validity of the form
+         *
+         * @param {Object} schema to validate
+         * @param {Object} data to validate
+         */
+        $form.validate = function(schema, data) {
 
             var errors = [];
 
@@ -214,34 +240,17 @@ define(["jquery", "bootstrap"], function($) {
 
                     } else if (schema.required && !value) {
 
-                        if (schema.show_if) {
-
-                            for (var i in schema.show_if) {
-
-                                if (!$form.getVisiblityCondition(schema.show_if)) {
-                                    return true;
-                                }
-                            }
+                        if (schema.show_if && !$form.getVisiblityCondition(schema.show_if, data)) {
+                            return true;
                         }
 
                         errors.push($form.find("#" + id));
                     }
                 });
 
-            })($form.schema);
+            })(schema);
 
-            if (!errors.length) {
-
-                (typeof selfCallback === "function" ? selfCallback : callback).call($form, data);
-
-            } else {
-
-                setTimeout(function() {
-                    errors.reverse().map($form.throwError);
-                }, 150);
-            }
-
-            return false; // Need for prevent native form's submit action
+            return errors;
         };
 
 
@@ -322,12 +331,14 @@ define(["jquery", "bootstrap"], function($) {
          */
         $form.updateVisiblityState = function() {
 
+            var data = $form.toJSON();
+
             for (var i = 0; i < $form.visiblityConditions.length; i++) {
 
                 var $field = $form.visiblityConditions[i].$field;
                 var show_if = $form.visiblityConditions[i].show_if;
 
-                $field[$form.getVisiblityCondition(show_if) ? "show" : "hide"]();
+                $field[$form.getVisiblityCondition(show_if, data) ? "show" : "hide"]();
             }
 
             return $form;
@@ -338,18 +349,19 @@ define(["jquery", "bootstrap"], function($) {
          * Method returns curent field's visiblity status
          *
          * @param {String} form field's show_if condition
+         * @param {Object} actual form's data
          * @returns {Boolean} current field's visiblity
          */
-        $form.getVisiblityCondition = function(show_if) {
-            return new Function("data", "return " + show_if).call($form, $form.toJSON());
+        $form.getVisiblityCondition = function(show_if, data) {
+            return new Function("data", "return " + show_if).call($form, data);
         };
 
 
         // Build the form if form's data exists
         return $form
             .render(schema, data)
-            .off("submit", $form.validate)
-            .on("submit", $form.validate)
+            .off("submit", $form.handler)
+            .on("submit", $form.handler)
             .off("input change", $form.updateVisiblityState)
             .on("input change", $form.updateVisiblityState);
     };
