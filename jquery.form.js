@@ -119,10 +119,8 @@ define(["jquery", "bootstrap"], function($) {
                 var value = $form.getFieldValue(this.name, data);
 
                 if (typeof value !== "undefined") {
-
                     $(this).val(value);
                 }
-
             });
 
             return $form.trigger("change");
@@ -171,16 +169,12 @@ define(["jquery", "bootstrap"], function($) {
                 if ($control.attr("multiple") || $control.attr("type") === "checkbox") {
 
                     if (parent[field].push) {
-
                         parent[field].push(value);
-
                     } else {
-
                         parent[field] = [value];
                     }
 
                 } else {
-
                     parent[field] = value;
                 }
                 /* >>>>>> TODO: Transform mechanism under the scheme work instead DOM */
@@ -209,7 +203,6 @@ define(["jquery", "bootstrap"], function($) {
                 }, 150);
 
             } else {
-
                 callback.call($form, data);
             }
 
