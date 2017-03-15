@@ -1,7 +1,7 @@
 
 
 {
-    "name": "jquery.form.js",
+    "name": "jquery.form",
     "version": "1.0.0",
     "description": "jQuery plugin for Twitter Bootstrap 3 framework forms",
     "main": "jquery.form.js",
