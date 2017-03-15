@@ -4,10 +4,10 @@
     "name": "jquery.form.js",
     "version": "1.0.0",
     "description": "jQuery plugin for Twitter Bootstrap 3 framework forms",
-    "main": "index.js",
+    "main": "jquery.form.js",
     "author": "Author Oleg Taranov aka Kujbor",
     "dependencies": {
-        "svg-sprite-loader": "^0.3.0",
-        "url-loader": "^0.5.7"
+        "jquery": "latest",
+        "bootstrap": "latest"
     }
 }
