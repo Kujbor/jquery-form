@@ -73,7 +73,7 @@ require(["jquery.form", "underscore"], function($) {
 });
 ```
 #### Webpack
-For compiling using Webpack, you can use jQueryFormWrapper.
+For compiling using Webpack, you can do this:
 ```javascript
 import $ from 'jquery';
 import jForm from 'jquery.form';
