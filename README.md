@@ -72,3 +72,14 @@ require(["jquery.form", "underscore"], function($) {
     });
 });
 ```
+#### Webpack
+For compiling using Webpack, you can use jQueryFormWrapper.
+```javascript
+import $ from 'jquery';
+import jForm from 'jquery.form';
+
+$.fn.form = jForm;
+$.fn.tooltip = function() {};
+```
+
+In this case, for some unknown for me reason, $.fn.tooltip is not mixed from Twitter Bootstrap. So, you can write your own or find another solution to correct mixing $.fn.tooltip from Bootstrap.
