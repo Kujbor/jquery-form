@@ -358,4 +358,7 @@ define(["jquery", "bootstrap"], function($) {
             .off("input change", $form.updateVisiblityState)
             .on("input change", $form.updateVisiblityState);
     };
+
+    // Bind our isolated fn.form to given jQuery instance
+    if (typeof module !== 'undefined' && module.exports) module.exports = $.fn.form;
 });
